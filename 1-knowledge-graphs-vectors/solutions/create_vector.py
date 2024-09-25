@@ -14,7 +14,7 @@ from langchain_community.vectorstores.neo4j_vector import Neo4jVector
 from langchain_openai import OpenAIEmbeddings
 # end::import_vector[]
 
-COURSES_PATH = "llm-vectors-unstructured/data/asciidoc"
+COURSES_PATH = "1-knowledge-graphs-vectors/data/asciidoc"
 
 loader = DirectoryLoader(COURSES_PATH, glob="**/lesson.adoc", loader_cls=TextLoader)
 docs = loader.load()
