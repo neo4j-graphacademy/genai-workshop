@@ -6,7 +6,7 @@ from langchain_openai import ChatOpenAI
 from langchain_neo4j import GraphCypherQAChain, Neo4jGraph
 from langchain.prompts import PromptTemplate
 
-llm = ChatOpenAI(openai_api_key=os.getenv("OPENAI_API_KEY"), temperature=0.0, seed=1)
+llm = ChatOpenAI(openai_api_key=os.getenv('OPENAI_API_KEY'))
 
 graph = Neo4jGraph(
     url=os.getenv('NEO4J_URI'),
