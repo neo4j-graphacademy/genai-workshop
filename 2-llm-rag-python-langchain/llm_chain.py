@@ -4,7 +4,7 @@ load_dotenv()
 
 from langchain_openai import OpenAI
 from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
+from langchain.chains.llm import LLMChain
 
 llm = OpenAI(openai_api_key=os.getenv('OPENAI_API_KEY'))
 

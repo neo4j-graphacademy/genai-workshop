@@ -2,10 +2,9 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-from langchain.chains import RetrievalQA
+from langchain.chains.retrieval_qa.base import RetrievalQA
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain_community.graphs import Neo4jGraph
-from langchain_community.vectorstores import Neo4jVector
+from langchain_neo4j import Neo4jGraph, Neo4jVector
 
 llm = ChatOpenAI(openai_api_key=os.getenv('OPENAI_API_KEY'))
 

@@ -8,8 +8,7 @@ from langchain.schema import StrOutputParser
 # tag::imports[]
 from langchain_core.prompts import MessagesPlaceholder
 from langchain_core.runnables.history import RunnableWithMessageHistory
-from langchain_community.graphs import Neo4jGraph
-from langchain_community.chat_message_histories import Neo4jChatMessageHistory
+from langchain_neo4j import Neo4jChatMessageHistory, Neo4jGraph
 from uuid import uuid4
 # end::imports[]
 # tag::session-id[]
