@@ -3,8 +3,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from langchain_openai import ChatOpenAI
-from langchain_community.graphs import Neo4jGraph
-from langchain.chains import GraphCypherQAChain
+from langchain_neo4j import GraphCypherQAChain, Neo4jGraph
 from langchain.prompts import PromptTemplate
 
 llm = ChatOpenAI(openai_api_key=os.getenv('OPENAI_API_KEY'))
@@ -32,7 +31,8 @@ cypher_chain = GraphCypherQAChain.from_llm(
     llm,
     graph=graph,
     cypher_prompt=cypher_generation_prompt,
-    verbose=True
+    verbose=True,
+    allow_dangerous_requests=True,
 )
 
 cypher_chain.invoke({"query": "What is the plot of the movie Toy Story?"})

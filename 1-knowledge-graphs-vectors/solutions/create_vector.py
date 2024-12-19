@@ -7,10 +7,10 @@ from langchain_community.document_loaders import DirectoryLoader, TextLoader
 from langchain.text_splitter import CharacterTextSplitter
 # end::import_splitter[]
 # tag::import_graph[]
-from langchain_community.graphs import Neo4jGraph
+from langchain_neo4j import Neo4jGraph
 # end::import_graph[]
 # tag::import_vector[]
-from langchain_community.vectorstores.neo4j_vector import Neo4jVector
+from langchain_neo4j import Neo4jVector
 from langchain_openai import OpenAIEmbeddings
 # end::import_vector[]
 

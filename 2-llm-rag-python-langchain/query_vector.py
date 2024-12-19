@@ -3,8 +3,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from langchain_openai import OpenAIEmbeddings
-from langchain_community.graphs import Neo4jGraph
-from langchain_community.vectorstores import Neo4jVector
+from langchain_neo4j import Neo4jGraph, Neo4jVector
 
 embedding_provider = OpenAIEmbeddings(
     openai_api_key=os.getenv('OPENAI_API_KEY')
