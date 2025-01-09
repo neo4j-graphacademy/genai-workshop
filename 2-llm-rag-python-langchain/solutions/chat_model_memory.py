@@ -67,8 +67,7 @@ current_weather = """
     }"""
 
 # tag::loop[]
-while True:
-    question = input("> ")
+while (question := input("> ")) != "exit":
 
     response = chat_with_message_history.invoke(
         {
