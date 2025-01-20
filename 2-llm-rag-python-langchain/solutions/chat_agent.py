@@ -63,8 +63,7 @@ chat_agent = RunnableWithMessageHistory(
 )
 #end::chat_agent[]
 
-while True:
-    q = input("> ")
+while (q := input("> ")) != "exit":
 
     response = chat_agent.invoke(
         {

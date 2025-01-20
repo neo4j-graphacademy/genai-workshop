@@ -92,8 +92,7 @@ chat_agent = RunnableWithMessageHistory(
     history_messages_key="chat_history",
 )
 
-while True:
-    q = input("> ")
+while (q := input("> ")) != "exit":
 
     response = chat_agent.invoke(
         {
