@@ -16,5 +16,8 @@ docs = loader.load()
 # Split documents into chunks
 # chunks =
 
+# Create an embedding provider
+# embedding_provider =
+
 # Create a Neo4j vector store
 # neo4j_db =

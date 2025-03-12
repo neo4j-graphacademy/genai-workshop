@@ -41,10 +41,17 @@ graph = Neo4jGraph(
 )
 # end::graph[]
 
+# tag::embedding[]
+embedding_provider = OpenAIEmbeddings(
+    openai_api_key=os.getenv('OPENAI_API_KEY'),
+    model="text-embedding-ada-002"
+    )
+# end::embedding[]
+
 # tag::vector[]
 neo4j_vector = Neo4jVector.from_documents(
     chunks,
-    OpenAIEmbeddings(openai_api_key=os.getenv('OPENAI_API_KEY')),
+    embedding_provider,
     graph=graph,
     index_name="chunkVector",
     node_label="Chunk", 

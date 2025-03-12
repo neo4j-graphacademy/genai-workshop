@@ -2,10 +2,10 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
+from langchain_neo4j import Neo4jGraph
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.document_loaders import DirectoryLoader, TextLoader
 from langchain.text_splitter import CharacterTextSplitter
-from openai import OpenAI
-from neo4j import GraphDatabase
 
 COURSES_PATH = "1-knowledge-graphs-vectors/data/asciidoc"
 
@@ -16,42 +16,37 @@ text_splitter = CharacterTextSplitter(
     separator="\n\n",
     chunk_size=1500,
     chunk_overlap=200,
+    add_start_index=True
 )
 
 chunks = text_splitter.split_documents(docs)
 
-# tag::get_embedding[]
-def get_embedding(llm, text):
-    response = llm.embeddings.create(
-            input=text,
-            model="text-embedding-ada-002"
-        )
-    return response.data[0].embedding
-# end::get_embedding[]
-
 # tag::get_course_data[]
-def get_course_data(llm, chunk):
+def get_course_data(embedding_provider, chunk):
     data = {}
 
-    path = chunk.metadata['source'].split(os.path.sep)
-
+    filename = chunk.metadata["source"]
+    path = filename.split(os.path.sep)
+    paragraph_id = f"{filename}.{chunk.metadata["start_index"]}"
+    
     data['course'] = path[-6]
     data['module'] = path[-4]
     data['lesson'] = path[-2]
     data['url'] = f"https://graphacademy.neo4j.com/courses/{data['course']}/{data['module']}/{data['lesson']}"
+    data['id'] = paragraph_id
     data['text'] = chunk.page_content
-    data['embedding'] = get_embedding(llm, data['text'])
+    data['embedding'] = embedding_provider.embed_query(chunk.page_content)
 
     return data
 # end::get_course_data[]
 
 # tag::create_chunk[]
-def create_chunk(tx, data):
-    tx.run("""
+def create_chunk(graph, data):
+    graph.query("""
         MERGE (c:Course {name: $course})
         MERGE (c)-[:HAS_MODULE]->(m:Module{name: $module})
         MERGE (m)-[:HAS_LESSON]->(l:Lesson{name: $lesson, url: $url})
-        MERGE (l)-[:CONTAINS]->(p:Paragraph{text: $text})
+        MERGE (l)-[:CONTAINS]->(p:Paragraph{id: $id, text: $text})
         WITH p
         CALL db.create.setNodeVectorProperty(p, "embedding", $embedding)
         """, 
@@ -60,30 +55,28 @@ def create_chunk(tx, data):
 # end::create_chunk[]
 
 # tag::openai[]
-llm = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+llm = ChatOpenAI(
+    openai_api_key=os.getenv('OPENAI_API_KEY'), 
+    model_name="gpt-3.5-turbo"
+)
 # end::openai[]
 
-# tag::neo4j[]
-driver = GraphDatabase.driver(
-    os.getenv('NEO4J_URI'),
-    auth=(
-        os.getenv('NEO4J_USERNAME'),
-        os.getenv('NEO4J_PASSWORD')
+# tag::embedding[]
+embedding_provider = OpenAIEmbeddings(
+    openai_api_key=os.getenv('OPENAI_API_KEY'),
+    model="text-embedding-ada-002"
     )
+# end::embedding[]
+
+# tag::neo4j[]
+graph = Neo4jGraph(
+    url=os.getenv('NEO4J_URI'),
+    username=os.getenv('NEO4J_USERNAME'),
+    password=os.getenv('NEO4J_PASSWORD')
 )
-driver.verify_connectivity()
 # end::neo4j[]
 
 # tag::create[]
 for chunk in chunks:
-    with driver.session(database="neo4j") as session:
-        
-        session.execute_write(
-            create_chunk,
-            get_course_data(llm, chunk)
-        )
+    create_chunk(graph, get_course_data(embedding_provider, chunk))
 #end::create[]
-
-# tag::close[]
-driver.close()
-# end::close[]
