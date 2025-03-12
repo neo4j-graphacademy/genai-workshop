@@ -21,6 +21,13 @@ text_splitter = CharacterTextSplitter(
 
 chunks = text_splitter.split_documents(docs)
 
+# tag::embedding[]
+embedding_provider = OpenAIEmbeddings(
+    openai_api_key=os.getenv('OPENAI_API_KEY'),
+    model="text-embedding-ada-002"
+    )
+# end::embedding[]
+
 # tag::get_course_data[]
 def get_course_data(embedding_provider, chunk):
     data = {}
@@ -51,22 +58,8 @@ def create_chunk(graph, data):
         CALL db.create.setNodeVectorProperty(p, "embedding", $embedding)
         """, 
         data
-        )
-# end::create_chunk[]
-
-# tag::openai[]
-llm = ChatOpenAI(
-    openai_api_key=os.getenv('OPENAI_API_KEY'), 
-    model_name="gpt-3.5-turbo"
-)
-# end::openai[]
-
-# tag::embedding[]
-embedding_provider = OpenAIEmbeddings(
-    openai_api_key=os.getenv('OPENAI_API_KEY'),
-    model="text-embedding-ada-002"
     )
-# end::embedding[]
+# end::create_chunk[]
 
 # tag::neo4j[]
 graph = Neo4jGraph(
@@ -78,5 +71,8 @@ graph = Neo4jGraph(
 
 # tag::create[]
 for chunk in chunks:
-    create_chunk(graph, get_course_data(embedding_provider, chunk))
+    create_chunk(
+        graph, 
+        get_course_data(embedding_provider, chunk)
+    )
 #end::create[]

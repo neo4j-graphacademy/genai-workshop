@@ -9,9 +9,11 @@ from langchain.text_splitter import CharacterTextSplitter
 # tag::import_graph[]
 from langchain_neo4j import Neo4jGraph
 # end::import_graph[]
+# tag::import_embedding[]
+from langchain_openai import OpenAIEmbeddings
+# end::import_embedding[]
 # tag::import_vector[]
 from langchain_neo4j import Neo4jVector
-from langchain_openai import OpenAIEmbeddings
 # end::import_vector[]
 
 COURSES_PATH = "1-knowledge-graphs-vectors/data/asciidoc"
