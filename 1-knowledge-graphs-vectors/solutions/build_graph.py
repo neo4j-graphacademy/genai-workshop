@@ -33,9 +33,9 @@ def get_course_data(embedding_provider, chunk):
     data = {}
 
     filename = chunk.metadata["source"]
-    path = filename.split(os.path.sep)
     paragraph_id = f"{filename}.{chunk.metadata["start_index"]}"
     
+    path = filename.split(os.path.sep)
     data['course'] = path[-6]
     data['module'] = path[-4]
     data['lesson'] = path[-2]
@@ -46,6 +46,14 @@ def get_course_data(embedding_provider, chunk):
 
     return data
 # end::get_course_data[]
+
+# tag::neo4j[]
+graph = Neo4jGraph(
+    url=os.getenv('NEO4J_URI'),
+    username=os.getenv('NEO4J_USERNAME'),
+    password=os.getenv('NEO4J_PASSWORD')
+)
+# end::neo4j[]
 
 # tag::create_chunk[]
 def create_chunk(graph, data):
@@ -61,18 +69,9 @@ def create_chunk(graph, data):
     )
 # end::create_chunk[]
 
-# tag::neo4j[]
-graph = Neo4jGraph(
-    url=os.getenv('NEO4J_URI'),
-    username=os.getenv('NEO4J_USERNAME'),
-    password=os.getenv('NEO4J_PASSWORD')
-)
-# end::neo4j[]
-
 # tag::create[]
 for chunk in chunks:
-    create_chunk(
-        graph, 
-        get_course_data(embedding_provider, chunk)
-    )
+    data = get_course_data(embedding_provider, chunk)
+    create_chunk(graph, data)
+    print("Processed chunk", data['id'])
 #end::create[]
