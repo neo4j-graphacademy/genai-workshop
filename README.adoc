@@ -22,5 +22,5 @@ pip install pytest
 . Run the tests
 +
 [source,sh]
-pytest 1-knowledge-graph-vectors/solutions
+pytest 1-knowledge-graphs-vectors/solutions
 pytest 2-llm-rag-python-langchain/solutions
