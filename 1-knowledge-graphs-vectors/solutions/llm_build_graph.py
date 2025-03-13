@@ -83,9 +83,8 @@ for chunk in chunks:
     create_chunk(graph, data)
 
     graph_docs = doc_transformer.convert_to_graph_documents([chunk])
-    # tag::llm_graph_docs[]
-    print(graph_docs)
-    exit()
+    # end::llm_graph_docs[]
+    
     # tag::map_entities[]
     for graph_doc in graph_docs:
         paragraph_node = Node(
