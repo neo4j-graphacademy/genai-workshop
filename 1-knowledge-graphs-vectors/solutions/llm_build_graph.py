@@ -64,6 +64,7 @@ def create_chunk(graph, data):
     )
 
 # tag::llm[]
+# Create an OpenAI LLM instance
 llm = ChatOpenAI(
     openai_api_key=os.getenv('OPENAI_API_KEY'), 
     model_name="gpt-3.5-turbo"
@@ -71,6 +72,7 @@ llm = ChatOpenAI(
 # end::llm[]
 
 # tag::doc_transformer[]
+# Create an LLMGraphTransformer instance
 doc_transformer = LLMGraphTransformer(
     llm=llm,
     allowed_nodes=["Technology", "Concept", "Skill", "Event", "Person", "Object"],
@@ -82,10 +84,12 @@ for chunk in chunks:
     data = get_course_data(embedding_provider, chunk)
     create_chunk(graph, data)
 
+    # Generate the graph docs
     graph_docs = doc_transformer.convert_to_graph_documents([chunk])
     # end::llm_graph_docs[]
     
     # tag::map_entities[]
+    # Map the entities in the graph documents to the paragraph node
     for graph_doc in graph_docs:
         paragraph_node = Node(
             id=data["id"],
@@ -104,6 +108,7 @@ for chunk in chunks:
     # end::map_entities[]
 
     # tag::llm_add_graph[]
+    # Add the graph documents to the graph
     graph.add_graph_documents(graph_docs)
     # end::llm_add_graph[]
 
