@@ -3,9 +3,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from langchain_neo4j import Neo4jGraph
-from langchain_openai import OpenAIEmbeddings
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.document_loaders import DirectoryLoader, TextLoader
 from langchain.text_splitter import CharacterTextSplitter
+from langchain_experimental.graph_transformers import LLMGraphTransformer
+from langchain_community.graphs.graph_document import Node, Relationship
 
 COURSES_PATH = "1-knowledge-graphs-vectors/data/asciidoc"
 
@@ -21,14 +23,11 @@ text_splitter = CharacterTextSplitter(
 
 chunks = text_splitter.split_documents(docs)
 
-# tag::embedding[]
 embedding_provider = OpenAIEmbeddings(
     openai_api_key=os.getenv('OPENAI_API_KEY'),
     model="text-embedding-ada-002"
     )
-# end::embedding[]
 
-# tag::get_course_data[]
 def get_course_data(embedding_provider, chunk):
     data = {}
 
@@ -45,17 +44,13 @@ def get_course_data(embedding_provider, chunk):
     data['embedding'] = embedding_provider.embed_query(chunk.page_content)
 
     return data
-# end::get_course_data[]
 
-# tag::neo4j[]
 graph = Neo4jGraph(
     url=os.getenv('NEO4J_URI'),
     username=os.getenv('NEO4J_USERNAME'),
     password=os.getenv('NEO4J_PASSWORD')
 )
-# end::neo4j[]
 
-# tag::create_chunk[]
 def create_chunk(graph, data):
     graph.query("""
         MERGE (c:Course {name: $course})
@@ -67,11 +62,24 @@ def create_chunk(graph, data):
         """, 
         data
     )
-# end::create_chunk[]
 
-# tag::create[]
+# Create an OpenAI LLM instance
+# llm = 
+
+# Create an LLMGraphTransformer instance
+# doc_transformer =
+
 for chunk in chunks:
     data = get_course_data(embedding_provider, chunk)
     create_chunk(graph, data)
+
+    # Generate the graph docs
+    # graph_docs =
+    
+    # Map the entities in the graph documents to the paragraph node
+    # for graph_doc in graph_docs:
+            
+    # Add the graph documents to the graph
+    # graph.
+    
     print("Processed chunk", data['id'])
-#end::create[]
