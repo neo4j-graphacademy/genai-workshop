@@ -4,7 +4,7 @@ This repository accompanies the link:graphacademy.neo4j.com/courses/genai-worksh
 
 For a complete walkthrough of this repository, link:graphacademy.neo4j.com/courses/genai-workshop[enrol now^].
 
-# Test
+== Test
 
 To run the solution tests: 
 
