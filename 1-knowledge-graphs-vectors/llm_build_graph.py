@@ -29,20 +29,17 @@ embedding_provider = OpenAIEmbeddings(
     )
 
 def get_course_data(embedding_provider, chunk):
-    data = {}
-
     filename = chunk.metadata["source"]
-    paragraph_id = f"{filename}.{chunk.metadata["start_index"]}"
-    
     path = filename.split(os.path.sep)
+
+    data = {}
     data['course'] = path[-6]
     data['module'] = path[-4]
     data['lesson'] = path[-2]
     data['url'] = f"https://graphacademy.neo4j.com/courses/{data['course']}/{data['module']}/{data['lesson']}"
-    data['id'] = paragraph_id
+    data['id'] = f"{filename}.{chunk.metadata["start_index"]}"
     data['text'] = chunk.page_content
     data['embedding'] = embedding_provider.embed_query(chunk.page_content)
-
     return data
 
 graph = Neo4jGraph(
