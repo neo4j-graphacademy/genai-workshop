@@ -3,9 +3,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from langchain_neo4j import Neo4jGraph
-from langchain_openai import OpenAIEmbeddings
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.document_loaders import DirectoryLoader, TextLoader
 from langchain.text_splitter import CharacterTextSplitter
+from langchain_experimental.graph_transformers import LLMGraphTransformer
+from langchain_community.graphs.graph_document import Node, Relationship
 
 COURSES_PATH = "1-knowledge-graphs-vectors/data/asciidoc"
 
@@ -21,14 +23,11 @@ text_splitter = CharacterTextSplitter(
 
 chunks = text_splitter.split_documents(docs)
 
-# tag::embedding[]
 embedding_provider = OpenAIEmbeddings(
     openai_api_key=os.getenv('OPENAI_API_KEY'),
     model="text-embedding-ada-002"
     )
-# end::embedding[]
 
-# tag::get_course_data[]
 def get_course_data(embedding_provider, chunk):
     filename = chunk.metadata["source"]
     path = filename.split(os.path.sep)
@@ -42,17 +41,13 @@ def get_course_data(embedding_provider, chunk):
     data['text'] = chunk.page_content
     data['embedding'] = embedding_provider.embed_query(chunk.page_content)
     return data
-# end::get_course_data[]
 
-# tag::neo4j[]
 graph = Neo4jGraph(
     url=os.getenv('NEO4J_URI'),
     username=os.getenv('NEO4J_USERNAME'),
     password=os.getenv('NEO4J_PASSWORD')
 )
-# end::neo4j[]
 
-# tag::create_chunk[]
 def create_chunk(graph, data):
     graph.query("""
         MERGE (c:Course {name: $course})
@@ -64,11 +59,54 @@ def create_chunk(graph, data):
         """, 
         data
     )
-# end::create_chunk[]
 
-# tag::create[]
+# tag::llm[]
+# Create an OpenAI LLM instance
+llm = ChatOpenAI(
+    openai_api_key=os.getenv('OPENAI_API_KEY'), 
+    model_name="gpt-3.5-turbo"
+)
+# end::llm[]
+
+# tag::doc_transformer[]
+# Create an LLMGraphTransformer instance
+doc_transformer = LLMGraphTransformer(
+    llm=llm,
+    allowed_nodes=["Technology", "Concept", "Skill", "Event", "Person", "Object"],
+    )
+# end::doc_transformer[]
+
+# tag::llm_graph_docs[]
 for chunk in chunks:
     data = get_course_data(embedding_provider, chunk)
     create_chunk(graph, data)
+
+    # Generate the graph docs
+    graph_docs = doc_transformer.convert_to_graph_documents([chunk])
+    # end::llm_graph_docs[]
+    
+    # tag::map_entities[]
+    # Map the entities in the graph documents to the paragraph node
+    for graph_doc in graph_docs:
+        paragraph_node = Node(
+            id=data["id"],
+            type="Paragraph",
+        )
+
+        for node in graph_doc.nodes:
+
+            graph_doc.relationships.append(
+                Relationship(
+                    source=paragraph_node,
+                    target=node, 
+                    type="HAS_ENTITY"
+                    )
+                )
+    # end::map_entities[]
+
+    # tag::llm_add_graph[]
+    # Add the graph documents to the graph
+    graph.add_graph_documents(graph_docs)
+    # end::llm_add_graph[]
+
     print("Processed chunk", data['id'])
-#end::create[]

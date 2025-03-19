@@ -9,9 +9,11 @@ from langchain.text_splitter import CharacterTextSplitter
 # tag::import_graph[]
 from langchain_neo4j import Neo4jGraph
 # end::import_graph[]
+# tag::import_embedding[]
+from langchain_openai import OpenAIEmbeddings
+# end::import_embedding[]
 # tag::import_vector[]
 from langchain_neo4j import Neo4jVector
-from langchain_openai import OpenAIEmbeddings
 # end::import_vector[]
 
 COURSES_PATH = "1-knowledge-graphs-vectors/data/asciidoc"
@@ -41,10 +43,17 @@ graph = Neo4jGraph(
 )
 # end::graph[]
 
+# tag::embedding[]
+embedding_provider = OpenAIEmbeddings(
+    openai_api_key=os.getenv('OPENAI_API_KEY'),
+    model="text-embedding-ada-002"
+    )
+# end::embedding[]
+
 # tag::vector[]
 neo4j_vector = Neo4jVector.from_documents(
     chunks,
-    OpenAIEmbeddings(openai_api_key=os.getenv('OPENAI_API_KEY')),
+    embedding_provider,
     graph=graph,
     index_name="chunkVector",
     node_label="Chunk", 

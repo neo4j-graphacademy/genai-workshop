@@ -2,13 +2,15 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-from openai import OpenAI
+from langchain_openai import OpenAIEmbeddings
 
-llm = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
-
-response = llm.embeddings.create(
-        input="Text to create embeddings for",
-        model="text-embedding-ada-002"
+embedding_provider = OpenAIEmbeddings(
+    openai_api_key=os.getenv('OPENAI_API_KEY'),
+    model="text-embedding-ada-002"
     )
 
-print(response.data[0].embedding)
+embedding = embedding_provider.embed_query(
+    "Text to create embeddings for"
+    )
+
+print(embedding)
